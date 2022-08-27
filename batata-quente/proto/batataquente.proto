@@ -1,0 +1,19 @@
+message Jogador {
+    required string name = 1;
+}
+
+message Interacao {
+    required string type =1;
+    required string jogadorName = 2;
+    optional string aditionalData = 3;
+}
+
+message CommomReply {
+    required bool success = 1;
+    optional string message = 2;
+}
+
+service BatataQuenteService {
+    rpc PossoEntrarNaBrincadeira (Jogador) returns (CommomReply);
+    rpc EntrarNaBrincadeira (stream Interacao) returns (stream Interacao);
+}
