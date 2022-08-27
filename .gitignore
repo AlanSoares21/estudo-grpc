@@ -105,3 +105,6 @@ dist
 
 # result of tyspescript build
 build/
+
+# resulta do instação das dependencias do projeto com npm
+package-lock.json
