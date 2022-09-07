@@ -27,11 +27,16 @@ export const batataQuenteServiceHandlers: BatataQuenteServiceHandlers = {
         callback(error, response);
     },
     EntrarNaBrincadeira (call: ServerDuplexStream<Interacao__Output, Interacao>): void {
+        logger.logInfo(`new peer connected: ${call.getPeer()}`);
         const novoJogador: IJogadorObserver = {
             data: {},
             sendNewInteracao: i => {
-                logger.logInfo(`enviando interacao ${i.type} do jogador ${i.jogadorName}. Adicional: ${i.aditionalData}`);
+                logger.logInfo(`enviando interacao ${i.type} do jogador ${i.jogadorName} para o jogador ${novoJogador.data.name}. Adicional: ${i.aditionalData}`);
                 call.write(i)
+            },
+            onExit: () => {
+                logger.logInfo(`finalizando call para o jogador ${novoJogador.data.name}`);
+                call.end()
             }
         };
         // registra que o jogador entrou na brincadeira

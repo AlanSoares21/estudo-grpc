@@ -5,22 +5,14 @@ import { Jogador } from "./proto/Jogador";
 export interface IJogadorObserver {
     data: Jogador;
     sendNewInteracao(interacao: Interacao): void;
-}
-
-export class JogadorObserver implements IJogadorObserver {
-    constructor(sendNewInteracao: (interacao: Interacao) => void) {
-        this.sendNewInteracao = sendNewInteracao;
-    }
-    data: Jogador = {};
-    sendNewInteracao(interacao: Interacao): void {
-        throw new Error("Method not implemented.");
-    }
+    onExit(): void;
 }
 
 export interface IServerState {
     addJogador(jogador: IJogadorObserver): void;
     removeJogador(jogador: IJogadorObserver): void;
     notifyJogadores(): void;
+    getJogadorObserverByName(name?: string): IJogadorObserver | undefined;
 
     listJogadores(): Jogador[];
     filterJogadoresByname(name?: string): Jogador[];
@@ -39,10 +31,17 @@ export default class ServerState implements IServerState {
     removeJogador(jogador: IJogadorObserver): void {
         const index = this.jogadores.indexOf(jogador);
         if (index === -1)
-            return logger.logError(`Jogador ${jogador.data.name} non exists.`);
+        return logger.logError(`Jogador ${jogador.data.name} non exists.`);
+        this.jogadores[index].onExit();
         this.jogadores.splice(index, 1);
     }
     
+    getJogadorObserverByName(name?: string | undefined): IJogadorObserver | undefined {
+        const index = this.jogadores.findIndex(j => j.data.name === name);
+        if (index === -1)
+            return undefined;
+        return this.jogadores[index];
+    }
     listJogadores(): Jogador[] {
         return this.jogadores.map(j => j.data);
     }

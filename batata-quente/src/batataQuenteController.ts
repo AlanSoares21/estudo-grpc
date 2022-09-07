@@ -21,5 +21,12 @@ export default {
     handleNewInteracao (serverState: IServerState, newInteracao: Interacao)  {
         logger.logInfo(`Nova interação ${newInteracao.type} do jogador ${newInteracao.jogadorName}`);
         serverState.addInteracao(newInteracao);
+        // tratando interacao para sair da brincadeira
+        if (newInteracao.type === 'chau') {
+            const jogador = serverState.getJogadorObserverByName(newInteracao.jogadorName);
+            if (jogador === undefined)
+                return logger.logInfo(`jogador ${newInteracao.jogadorName} nao tem um observer cadastrado com o mesmo nome.`);
+            serverState.removeJogador(jogador);
+        }
     },
 }
