@@ -9,7 +9,7 @@ type SubtypeConstructor<Constructor extends new (...args: any) => any, Subtype> 
 
 export interface ProtoGrpcType {
   BatataQuenteService: SubtypeConstructor<typeof grpc.Client, _BatataQuenteServiceClient> & { service: _BatataQuenteServiceDefinition }
-  CommomReply: MessageTypeDefinition
+  EntrarNaBrincadeiraReply: MessageTypeDefinition
   Interacao: MessageTypeDefinition
   Jogador: MessageTypeDefinition
 }

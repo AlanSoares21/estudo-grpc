@@ -13,11 +13,14 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/jsonwebtoken": "^8.5.9",
     "@types/node": "^18.7.13",
     "typescript": "^4.8.2"
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.6.10",
-    "@grpc/proto-loader": "^0.7.2"
+    "@grpc/proto-loader": "^0.7.2",
+    "dotenv": "^16.0.2",
+    "jsonwebtoken": "^8.5.1"
   }
 }

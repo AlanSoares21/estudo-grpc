@@ -1,11 +1,15 @@
+import dotenv from 'dotenv';
 import * as grpc from '@grpc/grpc-js';
 import * as protoLoader from '@grpc/proto-loader';
 import logger from './logger';
 import {ProtoGrpcType} from './proto/batataquente';
 import { batataQuenteServiceHandlers } from './servicesHandlers';
 
-const host = `0.0.0.0:9090`;
+// usando arquivo .env para definir variaveis de ambiente
+dotenv.config();
 
+const host = process.env.SERVER_HOST;
+logger.logInfo(`Server host: ${host}`);
 
 function createServer(): grpc.Server {
     // carregando definicao do .proto
