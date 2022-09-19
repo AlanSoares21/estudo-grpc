@@ -4,9 +4,9 @@ function log(message: string) {
 
 export default {
     logInfo (message: string) {
-        log(`[INFO] ${message}`);
+        log(`${Date.now()} [INFO] ${message}`);
     },
     logError (message: string) {
-        log(`[ERROR] ${message}`);
+        log(`${Date.now()} [ERROR] ${message}`);
     }
 }
