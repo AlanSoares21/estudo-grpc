@@ -7,6 +7,10 @@ import logger from './logger';
 import ServerState, { IJogadorObserver } from './ServerState';
 import batataQuenteController from './batataQuenteController';
 
+const metadataKeys = {
+    clientAuthToken: 'AUTHORIZATION'
+}
+
 type GrpcError = ServerErrorResponse | Partial<StatusObject> | null;
 
 const serverState = new ServerState();
@@ -27,9 +31,30 @@ export const batataQuenteServiceHandlers: BatataQuenteServiceHandlers = {
         callback(error, response);
     },
     Brincar (call: ServerDuplexStream<Interacao__Output, Interacao>): void {
-        logger.logInfo(`new peer connected: ${call.getPeer()}`);
+        const peer = call.getPeer();
+        logger.logInfo(`new peer connected: ${peer}`);
+        
+        // recuperando o token de autenticação
+        const authtokenMetadataList = call.metadata.get(metadataKeys.clientAuthToken);
+        if (authtokenMetadataList.length === 0) {
+            logger.logInfo(`O peer ${peer} não forneceu token de autenticação, portanto a chamada foi encerrada.`);
+            call.end();
+            return;
+        }
+        const authtoken = authtokenMetadataList[0].toString();
+        logger.logInfo(`Peer ${peer} autenticou com o token token: ${authtoken}`);
+
+        // extraindo dados do jogador do token de autenticação
+        const jogadorData = batataQuenteController.getJogadorDataFromAuthToken(authtoken);
+        if (jogadorData === undefined) {
+            logger.logInfo(`O peer ${peer} forneceu token de autenticação, mas não foi possivel recuperar os dados do jogador autenticado com o token ${authtoken}`);
+            call.end();
+            return;
+        }
+        logger.logInfo(`Peer ${peer} é o usuário ${jogadorData.name}`);
+
         const novoJogador: IJogadorObserver = {
-            data: {},
+            data: jogadorData,
             sendNewInteracao: i => {
                 logger.logInfo(`enviando interacao ${i.type} do jogador ${i.jogadorName} para o jogador ${novoJogador.data.name}. Adicional: ${i.aditionalData}`);
                 call.write(i)
@@ -42,24 +67,9 @@ export const batataQuenteServiceHandlers: BatataQuenteServiceHandlers = {
         // registra que o jogador entrou na brincadeira
         serverState.addJogador(novoJogador);
 
-        /**
-         * OBS: o campo data do novoJogador deve ser preenchido,
-         * porém a informação sobre quem é o jogador só chega quando uma interação é disparada,
-         * as funções a baixo são a maneira encontrada para contornar esse problema,
-         * porém, acredito que o ideal seja: que um metódo de autenticação seja implementado
-         * e os dados o usuário sejam obtidos através da autenticação.
-         * O método de autenticação não foi implementado agora por falta de conhecimento
-         */
-
         const onData = (interacao: Interacao) => batataQuenteController.handleNewInteracao(serverState, interacao);
-        
-        const onDataMiddleware = (interacao: Interacao) => {
-            if (novoJogador.data.name === undefined)
-                novoJogador.data = { name: interacao.jogadorName };
-            onData(interacao);
-        }
 
         // trata as interacoes que chegaram do usuario
-        call.on('data', onDataMiddleware);
+        call.on('data', onData);
     }
 }

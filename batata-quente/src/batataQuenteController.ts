@@ -16,6 +16,10 @@ function createJogadorAuthToken(jogador: Jogador) {
     return jwt.sign(jogador, process.env.JWT_PRIVATE_KEY, { expiresIn });
 }
 
+function decodeAuthToken(token: string): string | jwt.JwtPayload | null {
+    return jwt.decode(token);
+}
+
 export default {
     EntrarNaBrincadeira (serverState: IServerState, jogador: Jogador): EntrarNaBrincadeiraReply {
         // verificando se nao tem jogadores com esse nome na brincadeira
@@ -38,4 +42,16 @@ export default {
             serverState.removeJogador(jogador);
         }
     },
+    getJogadorDataFromAuthToken(token: string): undefined | Jogador {
+        const data = decodeAuthToken(token);
+        if (data === null || typeof data === 'string' || data.exp === undefined) {
+            logger.logInfo(`Não foi possivel decodificar o token. token decoded data type: ${typeof data}. Token: ${token}`)
+            return;
+        }
+        if (data.exp * 1000 < Date.now()) {
+            logger.logInfo(`token expirado. Expirava em ${data.exp * 1000}. Token: ${token}`)
+            return;
+        }
+        return data as Jogador;
+    }
 }
