@@ -8,6 +8,9 @@ import { getChanellCredentials, getHost, loadBatataQuenteDefinition } from './gr
 import readline from 'readline';
 import { EntrarNaBrincadeiraReply } from './proto/EntrarNaBrincadeiraReply';
 import { Jogador } from './proto/Jogador';
+import { Interacao } from './proto/Interacao';
+import { metadataKeys } from './servicesHandlers';
+import { CallMetadataGenerator } from '@grpc/grpc-js/build/src/call-credentials';
 
 // configurando o ambiente
 dotenv.config();
@@ -59,9 +62,8 @@ const entrarNaBrincadeira = (jogador: Jogador) => new Promise((
 // INTERACAO COM O USUARIO
 
 const getUserName = () => new Promise((resolve: (value: string) => any) => {
-    readlineInterface.question(`What's tour name?`, resolve);
+    readlineInterface.question(`What's tour name? \n`, resolve);
 });
-
 
 async function onClientReady() {
     /**
@@ -76,9 +78,47 @@ async function onClientReady() {
      * 1 interface
      * 2(stream) comunicacao com o server
      */
-    const name = await getUserName();
-    const entrarNaBrincadeiraResponse = await entrarNaBrincadeira({name}).catch((error: string) => ({message: error}));
-    if (!isEntraraNaBrincadeiraReply(entrarNaBrincadeiraResponse))
-        return logger.logInfo(`o nome ${name} não  pode ser utilizado.`);
-    logger.logInfo(`o nome ${name} pode ser utilizado. token: ${entrarNaBrincadeiraResponse.authtoken}`);
+    let name = '';
+    let brincadeiraData: EntrarNaBrincadeiraReply | undefined;
+    do {
+        name = await getUserName();
+        const entrarNaBrincadeiraResponse = await entrarNaBrincadeira({name}).catch((error: string) => ({message: error}));
+        if (isEntraraNaBrincadeiraReply(entrarNaBrincadeiraResponse)) 
+        {
+            brincadeiraData = entrarNaBrincadeiraResponse;
+        }
+        else
+            logger.logInfo(`o nome ${name} não  pode ser utilizado.`);
+    } while (brincadeiraData == undefined)
+    logger.logInfo(`o nome ${name} pode ser utilizado.`);
+    logger.logInfo(`conectando no server com o token: ${brincadeiraData.authtoken}`);
+    const authtoken = brincadeiraData.authtoken;
+    const authenticationMetadaGenerator: CallMetadataGenerator = (
+        _params: any, 
+        callback: (
+            param: null, 
+            metadata: grpc.Metadata
+        ) => void
+    ) => {
+        const meta = new grpc.Metadata();
+        meta.add(metadataKeys.clientAuthToken, authtoken || '');
+        callback(null, meta);
+    }
+    const callCreds = grpc.credentials.createFromMetadataGenerator(authenticationMetadaGenerator);
+    const brincadeiraStream = client.brincar({credentials: callCreds});
+    // verificando se ja nao começou fechada
+    if (brincadeiraStream.closed) {
+        logger.logInfo(`not possible connect to the server`);
+        process.exit();
+    }
+    brincadeiraStream.on('close', () => {
+        logger.logInfo(`disconnected...`);
+        process.exit();
+    });
+    brincadeiraStream.on('data', (data: Interacao) => {
+        logger.logInfo(`[${data.type}]${data.jogadorName} - ${data.aditionalData}`);
+    });
+    readlineInterface.on('line', line => {
+        brincadeiraStream.write({type: 'message', jogadorName: name, aditionalData: line});
+    });
 }

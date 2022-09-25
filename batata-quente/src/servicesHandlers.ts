@@ -7,7 +7,7 @@ import logger from './logger';
 import ServerState, { IJogadorObserver } from './ServerState';
 import batataQuenteController from './batataQuenteController';
 
-const metadataKeys = {
+export const metadataKeys = {
     clientAuthToken: 'AUTHORIZATION'
 }
 
