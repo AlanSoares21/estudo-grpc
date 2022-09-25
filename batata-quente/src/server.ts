@@ -1,22 +1,18 @@
 import dotenv from 'dotenv';
 import * as grpc from '@grpc/grpc-js';
-import * as protoLoader from '@grpc/proto-loader';
 import logger from './logger';
-import {ProtoGrpcType} from './proto/batataquente';
 import { batataQuenteServiceHandlers } from './servicesHandlers';
+import { getHost, getServerCredentials, loadBatataQuenteDefinition } from './grpcUtils';
 
 // usando arquivo .env para definir variaveis de ambiente
 dotenv.config();
 
-const host = process.env.SERVER_HOST;
+const host = getHost();
 logger.logInfo(`Server host: ${host}`);
 
 function createServer(): grpc.Server {
     // carregando definicao do .proto
-    const packageDefinition = protoLoader.loadSync('./proto/batataquente.proto');
-    const proto = grpc.loadPackageDefinition(
-        packageDefinition
-    ) as unknown as ProtoGrpcType;
+    const proto = loadBatataQuenteDefinition();
     const server = new grpc.Server();
     server.addService(proto.BatataQuenteService.service, batataQuenteServiceHandlers);
     return server;
@@ -26,7 +22,7 @@ function createServer(): grpc.Server {
 const server = createServer();
 server.bindAsync(
     host, 
-    grpc.ServerCredentials.createInsecure(),
+    getServerCredentials(),
     (err, port) => {
         if (err) {
             logger.logError(`Erro no bind do servidor: ${err.message}`);
