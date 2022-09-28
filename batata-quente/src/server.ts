@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import * as grpc from '@grpc/grpc-js';
 import logger from './logger';
-import { batataQuenteServiceHandlers } from './servicesHandlers';
+import { batataQuenteServiceHandlers } from './Server/servicesHandlers';
 import { getHost, getServerCredentials, loadBatataQuenteDefinition } from './grpcUtils';
 
 // usando arquivo .env para definir variaveis de ambiente

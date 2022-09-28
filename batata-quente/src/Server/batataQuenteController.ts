@@ -1,8 +1,8 @@
-import { Jogador } from "./proto/Jogador";
-import { EntrarNaBrincadeiraReply } from "./proto/EntrarNaBrincadeiraReply";
+import { Jogador } from "../proto/Jogador";
+import { EntrarNaBrincadeiraReply } from "../proto/EntrarNaBrincadeiraReply";
 import {IServerState} from "./ServerState";
-import { Interacao } from "./proto/Interacao";
-import logger from "./logger";
+import { Interacao } from "../proto/Interacao";
+import logger from "../logger";
 import jwt from 'jsonwebtoken';
 
 function jaExisteJogadorComEsseNome(serverState: IServerState, jogador: Jogador) {

@@ -2,7 +2,7 @@ import * as protoLoader from '@grpc/proto-loader';
 import * as grpc from '@grpc/grpc-js';
 import { ProtoGrpcType } from './proto/batataquente';
 import { CallMetadataGenerator } from '@grpc/grpc-js/build/src/call-credentials';
-import { metadataKeys } from './servicesHandlers';
+import { metadataKeys } from './Server/servicesHandlers';
 
 export function getHost(): string {
     return process.env.SERVER_HOST;

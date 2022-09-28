@@ -1,9 +1,9 @@
 import {ServerUnaryCall, sendUnaryData, ServerDuplexStream, ServerErrorResponse, StatusObject} from '@grpc/grpc-js';
-import {BatataQuenteServiceHandlers} from './proto/BatataQuenteService';
-import { EntrarNaBrincadeiraReply } from './proto/EntrarNaBrincadeiraReply';
-import { Interacao, Interacao__Output } from './proto/Interacao';
-import { Jogador__Output } from './proto/Jogador';
-import logger from './logger';
+import {BatataQuenteServiceHandlers} from '../proto/BatataQuenteService';
+import { EntrarNaBrincadeiraReply } from '../proto/EntrarNaBrincadeiraReply';
+import { Interacao, Interacao__Output } from '../proto/Interacao';
+import { Jogador__Output } from '../proto/Jogador';
+import logger from '../logger';
 import ServerState, { IJogadorObserver } from './ServerState';
 import batataQuenteController from './batataQuenteController';
 

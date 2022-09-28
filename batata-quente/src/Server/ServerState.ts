@@ -1,6 +1,6 @@
-import logger from "./logger";
-import { Interacao } from "./proto/Interacao";
-import { Jogador } from "./proto/Jogador";
+import logger from "../logger";
+import { Interacao } from "../proto/Interacao";
+import { Jogador } from "../proto/Jogador";
 
 export interface IJogadorObserver {
     data: Jogador;
