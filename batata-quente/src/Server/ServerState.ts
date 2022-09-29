@@ -22,6 +22,7 @@ export interface IServerState {
 
     gameIsStarted(): boolean;
     setJogadorComBatata(jogador: Jogador): void;
+    getJogadorComBatata(): Jogador | undefined;
 }
 
 export default class ServerState implements IServerState {
@@ -73,5 +74,8 @@ export default class ServerState implements IServerState {
     }
     setJogadorComBatata(jogador: Jogador): void {
         this.jogadorComBatata = jogador;
+    }
+    getJogadorComBatata(): Jogador | undefined {
+        return this.jogadorComBatata;
     }
 }
