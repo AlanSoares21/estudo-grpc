@@ -13,16 +13,17 @@ export interface IServerState {
     removeJogador(jogador: IJogadorObserver): void;
     notifyJogadores(interacao: Interacao): void;
     getJogadorObserverByName(name?: string): IJogadorObserver | undefined;
-
+    
     listJogadores(): Jogador[];
     filterJogadoresByname(name?: string): Jogador[];
-
+    
     listInteracoes(): Interacao[];
     addInteracao(interacao: Interacao): void;
-
+    
     gameIsStarted(): boolean;
     setJogadorComBatata(jogador: Jogador): void;
     getJogadorComBatata(): Jogador | undefined;
+    resetStateToDefault(): void;
 }
 
 export default class ServerState implements IServerState {
@@ -77,5 +78,17 @@ export default class ServerState implements IServerState {
     }
     getJogadorComBatata(): Jogador | undefined {
         return this.jogadorComBatata;
+    }
+
+    removeAllJogadoresObservers() {
+        for (const jogador of this.jogadores)
+            jogador.onExit();
+        this.jogadores = [];
+    }
+
+    resetStateToDefault(): void {
+        this.removeAllJogadoresObservers();
+        this.jogadorComBatata = undefined;
+        this.interacoes = [];
     }
 }

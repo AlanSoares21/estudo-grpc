@@ -37,6 +37,21 @@ function tryParseAdditionalData<TAdditionalData>(additionalData: Interacao['adit
     }
 }
 
+const DEFAULT_MAX_SECONDS_TO_STOP = 60;
+
+function getSecondsToStop(): number {
+    const maxsecondsToStop = process.env.MAX_SECONDS_TO_STOP || DEFAULT_MAX_SECONDS_TO_STOP;
+    let secondsToStop = getRandomIntegerLessThan(maxsecondsToStop);
+    return secondsToStop + 1;
+}
+
+function batataQueimou(serverState: IServerState) {
+    const jogadorComBatata = serverState.getJogadorComBatata();
+    logger.logInfo(`batata queimou! A batata estava com: ${jogadorComBatata?.name}`);
+    sendServerMessage(serverState, `A batata queimou com ${jogadorComBatata?.name}`);
+    serverState.resetStateToDefault();
+}
+
 const interacoesHandlers: {
     [interacaoType: string]: TInteracaoHandler | undefined;
 } = {
@@ -69,6 +84,12 @@ const interacoesHandlers: {
         // montando informacoes do aditional data
         const startEvent: TStartEvent = { jogadorComBatata: jogador.name || 'name não informado' };
         interacao.aditionalData = JSON.stringify(startEvent);
+        // registrando timeout para o jogo
+        const secondsToStop = getSecondsToStop();
+        logger.logInfo(`O jogo foi iniciado, a batata esta com ${jogador.name}, o jogo termina em ${secondsToStop} segundos`);
+        setTimeout(() => {
+            batataQueimou(serverState);
+        }, secondsToStop * 1000);
         // registrando interação
         regiterInteracaoAndNotifyJogadores(serverState, interacao);
     },
