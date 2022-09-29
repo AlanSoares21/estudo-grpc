@@ -46,14 +46,35 @@ export default class ClientController {
         const callCreds = credentials.createFromMetadataGenerator(createAuthMetadataGenerator(token));
         // iniciando stream
         const brincarStream = this._batataQuenteClient.brincar(callCreds, jogadorName)
-            .onClose(() => {
+            .onEnd(() => {
                 logger.logInfo('The server close the connection');
                 process.exit();
             })
             .onData(interacao => {
                 logger.logInfo(`[${interacao.type}]${interacao.jogadorName} - ${interacao.aditionalData}`);
             });
+        // guarda o comportamentamento de cada comando
+        const commands: {[key: string]: (args: string[]) => any} = {
+            'chau': args => brincarStream.chau(),
+            'send': args => brincarStream.sendMessage(args.join(' '))
+        }
+        // lista dos comandos validos
+        const validCommands = Object.keys(commands);
+
+        // trata o input de novos comandos do usuario
+        function executeCommand(line: string) {
+            const args = line.trim().split(' ');
+            if (args.length === 0) 
+                return logger.logInfo(`É necessário digitar um comando valido`);
+            // retirando o primeiro argumento
+            const [ command ] = args.splice(0, 1);
+            if (!validCommands.some(value => value === command)) 
+                return logger.logInfo(`O comando ${command} é invalido. Os comandos validos são \n\t ${validCommands.join('\n\t')}`);
+            // executando comando
+            commands[command](args);
+        }
+
         // registrando listener para quando o usuario insere uma nova linha
-        this._readlineInterface.on('line', brincarStream.sendMessage);
+        this._readlineInterface.on('line', executeCommand);
     }
 }

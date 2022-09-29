@@ -17,8 +17,19 @@ export default class BrincarStreamWrapper {
         this.stream.write({type: 'message', jogadorName: this.jogadorName, aditionalData: message});
     }
 
-    onClose(callback: () => any) {
-        this.stream.on('close', callback);
+    chau() {
+        this.stream.write({
+            type: 'chau',
+            jogadorName: this.jogadorName,
+            aditionalData: JSON.stringify({
+                jogadorName: this.jogadorName,
+                clientTime: Date.now()
+            })
+        });
+    }
+
+    onEnd(callback: () => any) {
+        this.stream.on('end', callback);
         return this;
     }
 
