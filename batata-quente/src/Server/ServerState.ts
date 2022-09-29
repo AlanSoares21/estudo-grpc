@@ -11,7 +11,7 @@ export interface IJogadorObserver {
 export interface IServerState {
     addJogador(jogador: IJogadorObserver): void;
     removeJogador(jogador: IJogadorObserver): void;
-    notifyJogadores(): void;
+    notifyJogadores(interacao: Interacao): void;
     getJogadorObserverByName(name?: string): IJogadorObserver | undefined;
 
     listJogadores(): Jogador[];
@@ -23,6 +23,7 @@ export interface IServerState {
 
 export default class ServerState implements IServerState {
     jogadores: IJogadorObserver[] = [];
+    jogadorComBatata: Jogador | undefined;
     interacoes: Interacao[] = [];
     
     addJogador(jogador: IJogadorObserver): void {
@@ -54,17 +55,13 @@ export default class ServerState implements IServerState {
     }
     addInteracao(interacao: Interacao): void {
         this.interacoes.push(interacao);
-        this.notifyJogadores();
     }
 
-    notifyJogadores(): void {
-        // pega ultima interacao
-        const lastInteracao: Interacao = this.interacoes[this.interacoes.length - 1];
+    notifyJogadores(interacao: Interacao): void {
         logger.logInfo(`notificando ${this.jogadores.length} jogadores`);
         // notifica os observers
-        for (const jogador of this.jogadores) {
-            jogador.sendNewInteracao(lastInteracao);
-        }
+        for (const jogador of this.jogadores)
+            jogador.sendNewInteracao(interacao);
         logger.logInfo(`${this.jogadores.length} jogadores notificados`);
     }
 }

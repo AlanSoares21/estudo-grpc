@@ -4,6 +4,7 @@ import {IServerState} from "./ServerState";
 import { Interacao } from "../proto/Interacao";
 import logger from "../logger";
 import jwt from 'jsonwebtoken';
+import interacoesHandlers from "./interacoesHandlers";
 
 function jaExisteJogadorComEsseNome(serverState: IServerState, jogador: Jogador) {
     return serverState.filterJogadoresByname(jogador.name).length > 0;
@@ -33,14 +34,16 @@ export default {
     },
     handleNewInteracao (serverState: IServerState, newInteracao: Interacao)  {
         logger.logInfo(`Nova interação ${newInteracao.type} do jogador ${newInteracao.jogadorName}`);
+        if (newInteracao.type === undefined)
+            return logger.logError(`A interação do jogador ${newInteracao.jogadorName} tem type nulo.`);
+        // obtendo o handler para a interacao
+        const interacaoHandler = interacoesHandlers[newInteracao.type];
+        if (interacaoHandler === undefined)
+            return logger.logError(` A interação ${newInteracao.type} do jogador ${newInteracao.jogadorName} não tem um handler cadastrado.`)
+        // adicionando registro da interacao
         serverState.addInteracao(newInteracao);
-        // tratando interacao para sair da brincadeira
-        if (newInteracao.type === 'chau') {
-            const jogador = serverState.getJogadorObserverByName(newInteracao.jogadorName);
-            if (jogador === undefined)
-                return logger.logInfo(`jogador ${newInteracao.jogadorName} nao tem um observer cadastrado com o mesmo nome.`);
-            serverState.removeJogador(jogador);
-        }
+        // executando handler da interacao
+        interacaoHandler(serverState, newInteracao);
     },
     getJogadorDataFromAuthToken(token: string): undefined | Jogador {
         const data = decodeAuthToken(token);
