@@ -3,6 +3,7 @@ import { BatataQuenteServiceClient } from "../proto/BatataQuenteService";
 import { EntrarNaBrincadeiraReply } from "../proto/EntrarNaBrincadeiraReply";
 import { Interacao, Interacao__Output } from "../proto/Interacao";
 import { Jogador } from "../proto/Jogador";
+import BrincarStreamWrapper from "./BrincarStreamWrapper";
 
 /**
  * Encapsula chamadas do client para facilitar o uso
@@ -30,12 +31,9 @@ export default class BatataQuenteClientWrapper {
         );
     }
 
-    brincar(credentials: CallCredentials, 
-        onData: (data: Interacao) => any,
-        onClose: () => any
-    ): ClientDuplexStream<Interacao, Interacao__Output> {
-        return this._client.brincar({credentials})
-        .on('close', onClose)
-        .on('data', onData);
+    brincar(credentials: CallCredentials,
+        jogadorName: string
+    ): BrincarStreamWrapper {
+        return new BrincarStreamWrapper(this._client.brincar({credentials}), jogadorName)
     }
 }

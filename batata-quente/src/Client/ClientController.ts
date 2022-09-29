@@ -8,7 +8,7 @@ import { EntrarNaBrincadeiraReply } from "../proto/EntrarNaBrincadeiraReply";
 import BatataQuenteClientWrapper from './BatataQuenteClientWrapper';
 
 /**
- * Trata a interacao entre o usuario e o prompt
+ * Controla interacao do usuario com o prompt
  */
 export default class ClientController {
     private _batataQuenteClient: BatataQuenteClientWrapper;
@@ -44,18 +44,16 @@ export default class ClientController {
     async brincar(token: string, jogadorName: string) {
         // gerando credenciais grpc para realizar call brincar
         const callCreds = credentials.createFromMetadataGenerator(createAuthMetadataGenerator(token));
-        const brincarStream = this._batataQuenteClient.brincar(
-            callCreds,
-            interacao => {
-                logger.logInfo(`[${interacao.type}]${interacao.jogadorName} - ${interacao.aditionalData}`);
-            },
-            () => {
+        // iniciando stream
+        const brincarStream = this._batataQuenteClient.brincar(callCreds, jogadorName)
+            .onClose(() => {
                 logger.logInfo('The server close the connection');
                 process.exit();
-            }
-        );
-        this._readlineInterface.on('line', line => {
-            brincarStream.write({type: 'message', jogadorName, aditionalData: line});
-        });
+            })
+            .onData(interacao => {
+                logger.logInfo(`[${interacao.type}]${interacao.jogadorName} - ${interacao.aditionalData}`);
+            });
+        // registrando listener para quando o usuario insere uma nova linha
+        this._readlineInterface.on('line', brincarStream.sendMessage);
     }
 }
