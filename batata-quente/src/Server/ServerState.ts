@@ -19,6 +19,9 @@ export interface IServerState {
 
     listInteracoes(): Interacao[];
     addInteracao(interacao: Interacao): void;
+
+    gameIsStarted(): boolean;
+    setJogadorComBatata(jogador: Jogador): void;
 }
 
 export default class ServerState implements IServerState {
@@ -40,7 +43,7 @@ export default class ServerState implements IServerState {
     getJogadorObserverByName(name?: string | undefined): IJogadorObserver | undefined {
         const index = this.jogadores.findIndex(j => j.data.name === name);
         if (index === -1)
-            return undefined;
+        return undefined;
         return this.jogadores[index];
     }
     listJogadores(): Jogador[] {
@@ -56,12 +59,19 @@ export default class ServerState implements IServerState {
     addInteracao(interacao: Interacao): void {
         this.interacoes.push(interacao);
     }
-
+    
     notifyJogadores(interacao: Interacao): void {
         logger.logInfo(`notificando ${this.jogadores.length} jogadores`);
         // notifica os observers
         for (const jogador of this.jogadores)
-            jogador.sendNewInteracao(interacao);
+        jogador.sendNewInteracao(interacao);
         logger.logInfo(`${this.jogadores.length} jogadores notificados`);
+    }
+
+    gameIsStarted(): boolean {
+        return this.jogadorComBatata !== undefined;
+    }
+    setJogadorComBatata(jogador: Jogador): void {
+        this.jogadorComBatata = jogador;
     }
 }

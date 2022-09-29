@@ -40,8 +40,6 @@ export default {
         const interacaoHandler = interacoesHandlers[newInteracao.type];
         if (interacaoHandler === undefined)
             return logger.logError(` A interação ${newInteracao.type} do jogador ${newInteracao.jogadorName} não tem um handler cadastrado.`)
-        // adicionando registro da interacao
-        serverState.addInteracao(newInteracao);
         // executando handler da interacao
         interacaoHandler(serverState, newInteracao);
     },
