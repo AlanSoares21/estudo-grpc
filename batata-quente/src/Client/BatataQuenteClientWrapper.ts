@@ -1,7 +1,6 @@
-import { CallCredentials, ClientDuplexStream } from "@grpc/grpc-js";
+import { CallCredentials } from "@grpc/grpc-js";
 import { BatataQuenteServiceClient } from "../proto/BatataQuenteService";
 import { EntrarNaBrincadeiraReply } from "../proto/EntrarNaBrincadeiraReply";
-import { Interacao, Interacao__Output } from "../proto/Interacao";
 import { Jogador } from "../proto/Jogador";
 import BrincarStreamWrapper from "./BrincarStreamWrapper";
 

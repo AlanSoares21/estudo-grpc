@@ -1,4 +1,5 @@
 import { ClientDuplexStream } from "@grpc/grpc-js";
+import { TPassarBatataEvent } from "../additionalDataTypes";
 import { Interacao, Interacao__Output } from "../proto/Interacao";
 
 export default class BrincarStreamWrapper {
@@ -32,6 +33,14 @@ export default class BrincarStreamWrapper {
         this.stream.write({
             type: 'startGame',
             jogadorName: this.jogadorName
+        });
+    }
+
+    passarBatata(data: TPassarBatataEvent) {
+        this.stream.write({
+            type: 'passarBatata',
+            jogadorName: this.jogadorName,
+            aditionalData: JSON.stringify(data)
         });
     }
 

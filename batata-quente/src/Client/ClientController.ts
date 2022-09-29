@@ -57,13 +57,19 @@ export default class ClientController {
         const commands: {[key: string]: (args: string[]) => any} = {
             'chau': args => brincarStream.chau(),
             'send': args => brincarStream.sendMessage(args.join(' ')),
-            'startGame': args => brincarStream.startGame()
+            'startGame': args => brincarStream.startGame(),
+            'passarBatata': args => {
+                if (args.length === 0) 
+                    return logger.logInfo(`voce deve dizer para quem deseja passar a batata!`);
+                brincarStream.passarBatata({jogadorRecebeBatata: args[0]});
+            }
         }
         // lista dos comandos validos
         const validCommands = Object.keys(commands);
 
         // trata o input de novos comandos do usuario
         function executeCommand(line: string) {
+            logger.logInfo(`executando um comando. line: ${line}`);
             const args = line.trim().split(' ');
             if (args.length === 0) 
                 return logger.logInfo(`É necessário digitar um comando valido`);
