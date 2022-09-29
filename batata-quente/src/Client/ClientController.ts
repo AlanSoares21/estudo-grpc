@@ -56,7 +56,8 @@ export default class ClientController {
         // guarda o comportamentamento de cada comando
         const commands: {[key: string]: (args: string[]) => any} = {
             'chau': args => brincarStream.chau(),
-            'send': args => brincarStream.sendMessage(args.join(' '))
+            'send': args => brincarStream.sendMessage(args.join(' ')),
+            'startGame': args => brincarStream.startGame()
         }
         // lista dos comandos validos
         const validCommands = Object.keys(commands);

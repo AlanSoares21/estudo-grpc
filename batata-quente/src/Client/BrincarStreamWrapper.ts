@@ -28,6 +28,13 @@ export default class BrincarStreamWrapper {
         });
     }
 
+    startGame() {
+        this.stream.write({
+            type: 'startGame',
+            jogadorName: this.jogadorName
+        });
+    }
+
     onEnd(callback: () => any) {
         this.stream.on('end', callback);
         return this;
