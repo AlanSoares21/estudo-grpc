@@ -21,8 +21,8 @@ function sendServerMessage(serverState: IServerState, message: string) {
     );
 }
 
-function getRandomIntegerLessThan(limit: number) {
-    return Math.round(Math.random() * limit);
+function getRandomIntegerLessOrEqualThan(value: number) {
+    return Math.round(Math.random() * value);
 }
 
 function tryParseAdditionalData<TAdditionalData>(additionalData: Interacao['aditionalData']): TAdditionalData | undefined {
@@ -41,7 +41,7 @@ const DEFAULT_MAX_SECONDS_TO_STOP = 60;
 
 function getSecondsToStop(): number {
     const maxsecondsToStop = process.env.MAX_SECONDS_TO_STOP || DEFAULT_MAX_SECONDS_TO_STOP;
-    let secondsToStop = getRandomIntegerLessThan(maxsecondsToStop);
+    let secondsToStop = getRandomIntegerLessOrEqualThan(maxsecondsToStop);
     return secondsToStop + 1;
 }
 
@@ -80,7 +80,11 @@ const interacoesHandlers: {
             return sendServerMessage(serverState, `O jogador ${interacao.jogadorName} tentou iniciar o jogo, mas o jogo já foi iniciado.`);
         const jogadores = serverState.listJogadores();
         // selecionando jogador aleatorio
-        const jogador = jogadores[getRandomIntegerLessThan(jogadores.length)];
+        const randomIndex = getRandomIntegerLessOrEqualThan(jogadores.length - 1);
+        if (randomIndex < 0 || randomIndex >= jogadores.length)
+            return sendServerMessage(serverState, `Não foi possivel pegar um jogador aletório. Tente novamente`);
+        const jogador = jogadores[randomIndex];
+        logger.logInfo(`jogador selecionado para ter a batata é ${JSON.stringify(jogador)}. index: ${randomIndex}`);
         // definindo quem esta com a batata
         serverState.setJogadorComBatata(jogador);
         // montando informacoes do aditional data
