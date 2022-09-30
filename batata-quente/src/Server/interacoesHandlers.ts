@@ -46,9 +46,11 @@ function getSecondsToStop(): number {
 }
 
 function batataQueimou(serverState: IServerState) {
-    const jogadorComBatata = serverState.getJogadorComBatata();
-    logger.logInfo(`batata queimou! A batata estava com: ${jogadorComBatata?.name}`);
-    sendServerMessage(serverState, `A batata queimou com ${jogadorComBatata?.name}`);
+    let jogadorComBatata = serverState.getJogadorComBatata();
+    if (jogadorComBatata === undefined)
+        jogadorComBatata = {name: 'jogador com batata estva undefined'};
+    logger.logInfo(`batata queimou! A batata estava com: ${jogadorComBatata.name}`);
+    sendServerMessage(serverState, `A batata queimou com ${jogadorComBatata.name}`);
     serverState.resetStateToDefault();
 }
 
@@ -116,7 +118,7 @@ const interacoesHandlers: {
             jogadorComBatata === undefined 
             || jogadorComBatata.name !== interacao.jogadorName
         )
-            return sendServerMessage(serverState, `${interacao.jogadorName} tentou passar a batata, mas a batata esta com ${jogadorComBatata?.name}`);
+            return sendServerMessage(serverState, `${interacao.jogadorName} tentou passar a batata, mas a batata esta com ${jogadorComBatata === undefined ? 'jogador com bata is undefined': jogadorComBatata.name}`);
         // validando se foi informado que ira receber a batata
         const passarBatata = tryParseAdditionalData<TPassarBatataEvent>(interacao.aditionalData);
         if (passarBatata === undefined)

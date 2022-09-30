@@ -33,7 +33,6 @@ export const batataQuenteServiceHandlers: BatataQuenteServiceHandlers = {
     Brincar (call: ServerDuplexStream<Interacao__Output, Interacao>): void {
         const peer = call.getPeer();
         logger.logInfo(`new peer connected: ${peer}`);
-        
         // recuperando o token de autenticação
         const authtokenMetadataList = call.metadata.get(metadataKeys.clientAuthToken);
         if (authtokenMetadataList.length === 0) {
@@ -43,7 +42,6 @@ export const batataQuenteServiceHandlers: BatataQuenteServiceHandlers = {
         }
         const authtoken = authtokenMetadataList[0].toString();
         logger.logInfo(`Peer ${peer} autenticou com o token token: ${authtoken}`);
-
         // extraindo dados do jogador do token de autenticação
         const jogadorData = batataQuenteController.getJogadorDataFromAuthToken(authtoken);
         if (jogadorData === undefined) {
@@ -52,24 +50,23 @@ export const batataQuenteServiceHandlers: BatataQuenteServiceHandlers = {
             return;
         }
         logger.logInfo(`Peer ${peer} é o usuário ${jogadorData.name}`);
-
+        
         const novoJogador: IJogadorObserver = {
             data: jogadorData,
             sendNewInteracao: i => {
                 logger.logInfo(`enviando interacao ${i.type} do jogador ${i.jogadorName} para o jogador ${novoJogador.data.name}. Adicional: ${i.aditionalData}`);
-                call.write(i)
+                call.write(i);
             },
             onExit: () => {
                 logger.logInfo(`finalizando call para o jogador ${novoJogador.data.name}`);
-                call.end()
+                call.end();
             }
         };
+        const onData = (interacao: Interacao) => batataQuenteController.handleNewInteracao(serverState, interacao);
         // registra que o jogador entrou na brincadeira
         serverState.addJogador(novoJogador);
-
-        const onData = (interacao: Interacao) => batataQuenteController.handleNewInteracao(serverState, interacao);
-
         // trata as interacoes que chegaram do usuario
         call.on('data', onData);
+        call.on('error', (err) => logger.logError(`Error na call do peer ${peer}. Erro: ${err.message}`));
     }
 }
