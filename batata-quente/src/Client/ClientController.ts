@@ -46,6 +46,9 @@ export default class ClientController {
         const callCreds = credentials.createFromMetadataGenerator(createAuthMetadataGenerator(token));
         // iniciando stream
         const brincarStream = this._batataQuenteClient.brincar(callCreds, jogadorName)
+            .onError((err: Error) => {
+                logger.logError(`Error on stream: ${err.message} - ${err.name}`);
+            })
             .onEnd(() => {
                 logger.logInfo('The server close the connection');
                 process.exit();
@@ -83,5 +86,8 @@ export default class ClientController {
 
         // registrando listener para quando o usuario insere uma nova linha
         this._readlineInterface.on('line', executeCommand);
+        if (process.env.DEBUG) {
+            executeCommand('startGame');
+        }
     }
 }

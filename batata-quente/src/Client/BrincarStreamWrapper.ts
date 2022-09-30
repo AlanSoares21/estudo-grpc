@@ -49,6 +49,11 @@ export default class BrincarStreamWrapper {
         return this;
     }
 
+    onError(callback: (err: Error) => void) {
+        this.stream.on('error', callback);
+        return this;
+    }
+
     onData(callback: (data: Interacao) => any) {
         this.stream.on('data', callback);
         return this;

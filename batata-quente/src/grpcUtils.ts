@@ -26,10 +26,7 @@ export function getChanellCredentials(): grpc.ChannelCredentials {
 export function createAuthMetadataGenerator(token: string): CallMetadataGenerator {
     return (
         _params: any, 
-        callback: (
-            param: null, 
-            metadata: grpc.Metadata
-        ) => void
+        callback: (param: null, metadata: grpc.Metadata) => void
     ) => {
         const meta = new grpc.Metadata();
         meta.add(metadataKeys.clientAuthToken, token);

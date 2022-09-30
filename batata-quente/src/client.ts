@@ -8,28 +8,27 @@ import ClientController from './Client/ClientController';
 // configurando o ambiente
 dotenv.config();
 
-const readlineInterface = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
+try {
+    const host = getHost();
+    logger.logInfo(`Connecting host: ${host}`);
+    const readlineInterface = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+    const client = createClientInstance(host);
+    const deadline = dateFiveSecondsAfterNow();
+    client.waitForReady(deadline, (error?: Error) => {
+        if (error) 
+            return logger.logInfo(`Client connect error: ${error.message}`);
+        onClientReady(new BatataQuenteClientWrapper(client), readlineInterface)
+    });
+}
+catch (err) {
+    logger.logError(`global: ${err}`);
+}
 
-const host = getHost();
-logger.logInfo(`Connecting host: ${host}`);
-
-const client = createClientInstance(host);
-
-const deadline = dateFiveSecondsAfterNow();
-
-client.waitForReady(deadline, (error?: Error) => {
-    if (error) 
-        return logger.logInfo(`Client connect error: ${error.message}`);
-    onClientReady();
-});
-
-async function onClientReady() {    
-    const clientController = new ClientController(
-        new BatataQuenteClientWrapper(client), 
-        readlineInterface);
+async function onClientReady(client: BatataQuenteClientWrapper, readlineInterface: readline.Interface) {    
+    const clientController = new ClientController(client, readlineInterface);
     // autenticando
     const { authData, name } = await clientController.authenticate();
     logger.logInfo(`O nome utilizado pelo jogador é: ${name}.`);
@@ -39,7 +38,7 @@ async function onClientReady() {
         return process.exit();
     }
     // brincando
-    clientController.brincar(authData.authtoken, name);
+    clientController.brincar(authData.authtoken, name)
 }
 
 function dateFiveSecondsAfterNow() {
